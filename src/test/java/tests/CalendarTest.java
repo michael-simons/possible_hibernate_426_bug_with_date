@@ -1,5 +1,6 @@
 package tests;
 
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
@@ -69,6 +70,11 @@ public class CalendarTest {
 		// 2013-10-15T00:00:00.000+02:00
 		System.out.println(foobar.getRefDate().getTime() + ", " + foobar.getTakenOn().getTime());		
 		System.out.println(new LocalDate(foobar.getRefDate()).toDateTimeAtStartOfDay());
+		
+		/* At least it seams to be consistent
+		Date date = (Date) this.entityManager.createNativeQuery("Select max(ref_date) from foobars").getSingleResult();
+		Assert.assertEquals(new LocalDate(date, ISOChronology.getInstanceUTC()), new LocalDate("2013-10-15", ISOChronology.getInstanceUTC()));
+		*/
 		
 		// When used with JodaLocal Date to enforce a UTC Chronoly:
 		Assert.assertEquals(new LocalDate(foobar.getRefDate(), ISOChronology.getInstanceUTC()), new LocalDate("2013-10-15", ISOChronology.getInstanceUTC()));
