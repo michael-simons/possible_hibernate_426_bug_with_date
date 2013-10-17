@@ -1,6 +1,9 @@
 package tests;
 
-import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
@@ -34,11 +37,69 @@ public class CalendarTest {
 	private EntityManagerFactory entityManagerFactory;
 	private EntityManager entityManager;
 	
+	private final TimeZone europe_berlin;
+	private final TimeZone utc;
+	
+	
+	
 	public CalendarTest() {
-		TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin"));
+		TimeZone.setDefault(europe_berlin = TimeZone.getTimeZone("Europe/Berlin"));
+		Locale.setDefault(Locale.GERMAN);
+		
+		this.utc = TimeZone.getTimeZone("UTC");
 		
 		this.entityManagerFactory = Persistence.createEntityManagerFactory("hibernate-test");
-		this.entityManager = this.entityManagerFactory.createEntityManager();	
+		this.entityManager = this.entityManagerFactory.createEntityManager();			
+	}
+	
+	private void stripTimeInfo(final Calendar valueFromJDBCDriver) {
+		// Create an UTC instance. Here it's safe to set everyting to ZERO apart from the date.
+		Calendar calUTC = Calendar.getInstance(utc);
+		calUTC.set(valueFromJDBCDriver.get(Calendar.YEAR), valueFromJDBCDriver.get(Calendar.MONTH), valueFromJDBCDriver.get(Calendar.DATE), 0, 0, 0);
+		
+		// Represent this date in the users timezone
+		valueFromJDBCDriver.setTimeInMillis(calUTC.getTimeInMillis());		
+	}
+	
+	@Test
+	public void possibleSolution() {		
+		final DateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		dateFormatUTC.setTimeZone(utc);
+		
+		
+		// This is what the MySQL driver returns...
+		// The value from the UTC DATE column with 00:00 values converted to
+		// the JVMs timezone
+		Calendar cal = Calendar.getInstance(europe_berlin);
+		cal.set(2013, 10-1, 15, 2, 0, 0);
+				
+		// Check if input is correct		
+		Assert.assertEquals("Tue Oct 15 02:00:00 CEST 2013", cal.getTime().toString());	
+		
+		// Strip time information
+		stripTimeInfo(cal);
+		// Lets check the value in UTC
+		Assert.assertEquals("2013-10-15 00:00", dateFormatUTC.format(cal.getTime()));
+		// Date#toString() always uses default TZ which has been set to Europe/Berlin 
+		Assert.assertEquals("Tue Oct 15 02:00:00 CEST 2013", cal.getTime().toString());
+		
+		// Regarding the other issue with the faulty Oracle 12c driver HHH-8517
+		// this solution works also
+		cal = Calendar.getInstance(europe_berlin);
+		cal.set(2013, 10-1, 15, 21, 21, 21);
+		
+		stripTimeInfo(cal);		
+		Assert.assertEquals("2013-10-15 00:00", dateFormatUTC.format(cal.getTime()));
+		Assert.assertEquals("Tue Oct 15 02:00:00 CEST 2013", cal.getTime().toString());
+		
+		// If everything is configured to use utc, the solution also works		
+		cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		// Asume we have the funny oracle driver again
+		cal.set(2013, 10-1, 15, 21, 21, 21);
+				
+		stripTimeInfo(cal);		
+		Assert.assertEquals("2013-10-15 00:00", dateFormatUTC.format(cal.getTime()));
+		Assert.assertEquals("Tue Oct 15 02:00:00 CEST 2013", cal.getTime().toString());		
 	}
 	
 	@Test
