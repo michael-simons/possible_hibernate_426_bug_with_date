@@ -55,6 +55,7 @@ public class CalendarTest {
 	private void stripTimeInfo(final Calendar valueFromJDBCDriver) {
 		// Create an UTC instance. Here it's safe to set everyting to ZERO apart from the date.
 		Calendar calUTC = Calendar.getInstance(utc);
+		calUTC.clear();
 		calUTC.set(valueFromJDBCDriver.get(Calendar.YEAR), valueFromJDBCDriver.get(Calendar.MONTH), valueFromJDBCDriver.get(Calendar.DATE), 0, 0, 0);
 		
 		// Represent this date in the users timezone
