@@ -38,7 +38,7 @@ import entities.Foobar;
  *   PRIMARY KEY (id)
  * ) CHARACTER SET utf8mb4 collate utf8mb4_bin engine innodb;
  * 
- * INSERT INTO foobars(id, ref_date, taken_on) values (1, '2013-10-15', '2013-10-15 05:29:21 ');
+ * INSERT INTO foobars(id, ref_date, taken_on) values (1, '2013-10-15', '2013-10-15 05:29:21');
  * 
  * COMMIT;
  * 
