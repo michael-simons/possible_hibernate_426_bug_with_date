@@ -1,8 +1,12 @@
 package tests;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -10,6 +14,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
@@ -101,6 +107,39 @@ public class CalendarTest {
 		stripTimeInfo(cal);		
 		Assert.assertEquals("2013-10-15 00:00", dateFormatUTC.format(cal.getTime()));
 		Assert.assertEquals("Tue Oct 15 02:00:00 CEST 2013", cal.getTime().toString());		
+	}
+	
+	/**
+	 * When the TZ and Time of a date column are not relevant, than explain to me,
+	 * why the date ends up as 2013-10-14 in my database....
+	 * @throws SQLException
+	 */
+	@Test
+	public void update() throws SQLException {
+		this.entityManager.getTransaction().begin();
+		Foobar foobar = new Foobar();
+		Calendar hlp = Calendar.getInstance();
+		// So this is now 2013-10-15 at Midnight CEST…
+		hlp.set(2013, 10-1, 15, 0, 0, 0);
+		foobar.setRefDate(hlp);
+		foobar.setTakenOn(Calendar.getInstance());
+		this.entityManager.persist(foobar);		
+		this.entityManager.getTransaction().commit();
+		final int id = foobar.getId();
+
+		final DateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Session session = entityManager.unwrap(Session.class);
+		session.doWork(new Work() {			
+			@Override
+			public void execute(Connection connection) throws SQLException {
+				ResultSet rs = connection.createStatement().executeQuery("Select ref_date from foobars where id = " + id);
+				rs.next();
+				Date date = rs.getDate(1);
+				Assert.assertEquals("2013-10-15", sf.format(date));
+				System.out.println(date);				
+			}
+		});		
 	}
 	
 	@Test
