@@ -28,14 +28,19 @@ import entities.Foobar;
  * 
  * use hibernate_test;
  * 
+ * DROP TABLE foobars;
+ * 
  * CREATE TABLE foobars (
  *   id  INT(8) NOT NULL AUTO_INCREMENT,
  *   ref_date  DATE NOT NULL,
  *   taken_on  DATETIME NOT NULL,
+ *   some_other_column VARCHAR(512) NULL,
  *   PRIMARY KEY (id)
  * ) CHARACTER SET utf8mb4 collate utf8mb4_bin engine innodb;
  * 
  * INSERT INTO foobars(id, ref_date, taken_on) values (1, '2013-10-15', '2013-10-15 05:29:21 ');
+ * 
+ * COMMIT;
  * 
  * @author Michael J. Simons
  */
@@ -120,7 +125,7 @@ public class CalendarTest {
 		Foobar foobar = new Foobar();
 		Calendar hlp = Calendar.getInstance();
 		// So this is now 2013-10-15 at Midnight CEST…
-		hlp.set(2013, 10-1, 15, 0, 0, 0);
+		hlp.set(2013, 10-1, 15, 2, 0, 0);
 		foobar.setRefDate(hlp);
 		foobar.setTakenOn(Calendar.getInstance());
 		this.entityManager.persist(foobar);		

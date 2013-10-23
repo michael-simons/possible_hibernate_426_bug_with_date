@@ -30,6 +30,9 @@ public class Foobar implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar takenOn;
 	
+	@Column(name="some_other_column")
+	private String someOtherColumn;
+	
 	public Calendar getTakenOn() {
 		return takenOn;
 	}
@@ -52,5 +55,13 @@ public class Foobar implements Serializable {
 
 	public void setRefDate(Calendar refDate) {
 		this.refDate = refDate;
+	}
+
+	public String getSomeOtherColumn() {
+		return someOtherColumn;
+	}
+
+	public void setSomeOtherColumn(String someOtherColumn) {
+		this.someOtherColumn = someOtherColumn;
 	}
 }
