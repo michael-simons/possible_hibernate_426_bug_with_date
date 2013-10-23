@@ -1,8 +1,10 @@
 package tests;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,6 +41,7 @@ import entities.Foobar;
  * ) CHARACTER SET utf8mb4 collate utf8mb4_bin engine innodb;
  * 
  * INSERT INTO foobars(id, ref_date, taken_on) values (1, '2013-10-15', '2013-10-15 05:29:21');
+ * INSERT INTO foobars(id, ref_date, taken_on) values (2, '2013-10-15', '2013-10-15 05:29:21');
  * 
  * COMMIT;
  * 
@@ -117,24 +120,25 @@ public class CalendarTest {
 	/**
 	 * When the TZ and Time of a date column are not relevant, than explain to me,
 	 * why the date ends up as 2013-10-14 in my database....
+	 * 
+	 * Starting with
+	 * INSERT INTO foobars(id, ref_date, taken_on) values (2, '2013-10-15', '2013-10-15 05:29:21');
+	 * 
 	 * @throws SQLException
 	 */
 	@Test
 	public void update() throws SQLException {
-		this.entityManager.getTransaction().begin();
-		Foobar foobar = new Foobar();
-		Calendar hlp = Calendar.getInstance();
-		// So this is now 2013-10-15 at Midnight CEST…
-		hlp.set(2013, 10-1, 15, 2, 0, 0);
-		foobar.setRefDate(hlp);
-		foobar.setTakenOn(Calendar.getInstance());
-		this.entityManager.persist(foobar);		
-		this.entityManager.getTransaction().commit();
-		final int id = foobar.getId();
-
+		final Session session = entityManager.unwrap(Session.class);
+						
 		final DateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 		
-		Session session = entityManager.unwrap(Session.class);
+		this.entityManager.getTransaction().begin();
+		Foobar foobar = this.entityManager.find(Foobar.class, 2);
+		// Update some column to force an update...
+		foobar.setSomeOtherColumn("blah");				
+		this.entityManager.getTransaction().commit();
+				
+		final int id = foobar.getId();
 		session.doWork(new Work() {			
 			@Override
 			public void execute(Connection connection) throws SQLException {
@@ -144,7 +148,7 @@ public class CalendarTest {
 				Assert.assertEquals("2013-10-15", sf.format(date));
 				System.out.println(date);				
 			}
-		});		
+		});
 	}
 	
 	@Test
