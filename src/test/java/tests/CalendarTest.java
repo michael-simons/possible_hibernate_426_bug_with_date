@@ -1,10 +1,8 @@
 package tests;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -129,6 +127,14 @@ public class CalendarTest {
 	@Test
 	public void update() throws SQLException {
 		final Session session = entityManager.unwrap(Session.class);
+		
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection connection) throws SQLException {
+				connection.createStatement().executeUpdate("Delete from foobars where id = 2");
+				connection.createStatement().executeUpdate("INSERT INTO foobars(id, ref_date, taken_on) values (2, '2013-10-15', '2013-10-15 05:29:21')");
+			}			
+		});
 						
 		final DateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 		
