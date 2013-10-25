@@ -159,6 +159,8 @@ public class CalendarTest {
 	
 	@Test
 	public void testCalendarMapping() {
+		final DateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+		
 		Foobar foobar = this.entityManager.find(Foobar.class, 1);
 	
 		// In both cases the @Temporal(TemporalType.TIMESTAMP) column
@@ -194,5 +196,8 @@ public class CalendarTest {
 		
 		// When used with JodaLocal Date to enforce a UTC Chronoly:
 		Assert.assertEquals(new LocalDate(foobar.getRefDate(), ISOChronology.getInstanceUTC()), new LocalDate("2013-10-15", ISOChronology.getInstanceUTC()));
+		Assert.assertEquals("2013-10-15", sf.format(foobar.getRefDate().getTime()));
+		Assert.assertEquals("2013-10-15", new LocalDate(foobar.getRefDate(), ISOChronology.getInstanceUTC()).toString());
+		Assert.assertEquals("2013-10-15", sf.format(new LocalDate(foobar.getRefDate(), ISOChronology.getInstanceUTC()).toDateTimeAtStartOfDay().toDate()));
 	}
 }
