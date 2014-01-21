@@ -6,7 +6,13 @@
 >
 	<persistence-unit name="hibernate-test" transaction-type="RESOURCE_LOCAL">
 		<!--  <provider>org.hibernate.ejb.HibernatePersistence</provider>  -->
-			
+		
+		<class>entities.A1</class>
+		<class>entities.A2</class>
+		<class>entities.AB1</class>
+		<class>entities.AB2</class>
+		<class>entities.B1</class>
+		<class>entities.B2</class>		
 		<class>entities.Foobar</class>
 				
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
