@@ -5,8 +5,8 @@
 	<artifactId>hibernate-426-bug</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
-		<org.hibernate.version>4.2.14.Final</org.hibernate.version>
-		<mysql.version>5.1.26</mysql.version>
+		<org.hibernate.version>4.2.19.Final</org.hibernate.version>
+		<mysql.version>5.1.34</mysql.version>
 	</properties>
 	<build>
 		<plugins>
